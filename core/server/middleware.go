@@ -192,7 +192,7 @@ func Middleware(writer http.ResponseWriter, request *http.Request) {
 		"http.url":       request.RequestURI,
 		"http.query":     request.URL.RawQuery,
 		"http.path":      request.URL.Path,
-		"http.UserAgent": strings.ToLower(reqUa),
+		"http.user_agent": strings.ToLower(reqUa),
 		"http.cookie":    request.Header.Get("Cookie"),
 
 		"proxy.stage":         domainData.Stage,
