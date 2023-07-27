@@ -543,14 +543,41 @@ func clearProxyCache() {
 		for ipCookie := range firewall.AccessIpsCookie {
 			delete(firewall.AccessIpsCookie, ipCookie)
 		}
+
+		proxyCpuUsage, pcuErr := strconv.ParseFloat(proxy.CpuUsage, 32)
+		if pcuErr != nil {
+			proxyCpuUsage = 0
+		}
+
+		proxyMemUsage, pmuErr := strconv.ParseFloat(proxy.RamUsage, 32)
+		if pmuErr != nil {
+			proxyMemUsage = 0
+		}
+
+		// Only clear if proxy isnt under attack / memory is running out
+		ipCacheLen := 0
 		firewall.CacheIps.Range(func(key, value any) bool {
-			firewall.CacheIps.Delete(key)
+			ipCacheLen++
 			return true
 		})
+		if proxyCpuUsage < 15 || proxyMemUsage > 95 {
+			firewall.CacheIps.Range(func(key, value any) bool {
+				firewall.CacheIps.Delete(key)
+				return true
+			})
+		}
+		// Same for here
+		imgCachelen := 0
 		firewall.CacheImgs.Range(func(key, value any) bool {
-			firewall.CacheImgs.Delete(key)
+			imgCachelen++
 			return true
 		})
+		if proxyCpuUsage < 15 || proxyMemUsage > 95 {
+			firewall.CacheImgs.Range(func(key, value any) bool {
+				firewall.CacheImgs.Delete(key)
+				return true
+			})
+		}
 		firewall.Mutex.Unlock()
 		time.Sleep(2 * time.Minute)
 	}
